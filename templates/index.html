@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Anti-Spam Guard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090e1a 0%, #03050c 100%);
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.06);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --accent-teal: #14b8a6;
+            --spam-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+            --spam-glow: rgba(239, 68, 68, 0.5);
+            --ham-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --ham-glow: rgba(16, 185, 129, 0.5);
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            background: rgba(3, 5, 12, 0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(to right, #818cf8, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            -webkit-text-fill-color: #818cf8;
+        }
+
+        .badge-status {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-teal);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            font-weight: 500;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 3rem 4rem;
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 3rem;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+                padding: 2rem;
+            }
+            header {
+                padding: 1.5rem 2rem;
+            }
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fff;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        select {
+            background: #090e1a;
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        textarea {
+            background: #060912;
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 1rem;
+            border-radius: 12px;
+            outline: none;
+            resize: vertical;
+            min-height: 280px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        button {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: var(--panel-border);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Panel CSS */
+        .results-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .welcome-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 400px;
+            color: var(--text-muted);
+            border: 2px dashed rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 3rem;
+            gap: 1rem;
+        }
+
+        .welcome-placeholder i {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .verdict-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .verdict-header.spam {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .verdict-header.ham {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .verdict-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .verdict-badge {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .verdict-badge.spam-text {
+            background: var(--spam-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px var(--spam-glow));
+        }
+
+        .verdict-badge.ham-text {
+            background: var(--ham-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px var(--ham-glow));
+        }
+
+        .gauge-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 200px;
+        }
+
+        .gauge-bar-outer {
+            height: 10px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .gauge-bar-inner {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .metric-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .metric-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .metric-flag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .metric-flag.warning {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .metric-flag.safe {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .preview-box {
+            background: #060912;
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #818cf8;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--panel-border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: rgba(3, 5, 12, 0.8);
+        }
+
+        /* Sample Template Selection */
+        .sample-loader {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>AEGIS SPAM GUARD</span>
+        </div>
+        <div class="badge-status">
+            <i class="fa-solid fa-circle-check"></i> ML Model Loaded (Linear SVM)
+        </div>
+    </header>
+
+    <main>
+        <!-- INPUT AREA -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <span>Email Analysis Portal</span>
+            </div>
+            
+            <div class="input-group">
+                <label for="templateSelect">Load Demonstration Template</label>
+                <select id="templateSelect" onchange="loadTemplate()">
+                    <option value="">-- Custom Email --</option>
+                    <option value="spam1">Spam: Urgent Bank Wire Offer</option>
+                    <option value="spam2">Spam: Sweepstakes Lottery Claim</option>
+                    <option value="ham1">Ham: Project Review Meeting Invite</option>
+                    <option value="ham2">Ham: Personal weekend plan request</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="emailInput">Raw Email Content</label>
+                <textarea id="emailInput" placeholder="Paste raw email with headers or plain message body here..."></textarea>
+            </div>
+
+            <button id="scanBtn" onclick="analyzeEmail()">
+                <i class="fa-solid fa-crosshairs"></i>
+                <span>Scan Message</span>
+            </button>
+        </div>
+
+        <!-- RESULTS AREA -->
+        <div class="results-wrapper">
+            <!-- Initial state placeholder -->
+            <div id="resultsPlaceholder" class="welcome-placeholder">
+                <i class="fa-solid fa-microchip"></i>
+                <h2>Ready for Analysis</h2>
+                <p>Paste email text or choose one of the templates on the left, then click Scan to dissect it using the Linear SVM model.</p>
+            </div>
+
+            <!-- Dynamic content container (hidden initially) -->
+            <div id="resultsContainer" style="display: none; flex-direction: column; gap: 2rem;">
+                
+                <!-- Verdict Header -->
+                <div id="verdictHeader" class="verdict-header">
+                    <div class="verdict-title">
+                        <span id="verdictIcon" style="font-size: 2.2rem;"></span>
+                        <div>
+                            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">System Verdict</div>
+                            <span id="verdictText" class="verdict-badge"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="gauge-container">
+                        <div class="gauge-label">
+                            <span id="gaugeLabelName">Confidence</span>
+                            <span id="gaugePct" style="font-weight: 700;">0%</span>
+                        </div>
+                        <div class="gauge-bar-outer">
+                            <div id="gaugeBar" class="gauge-bar-inner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Header Breakdown -->
+                <div class="card" style="padding: 1.5rem; gap: 1rem;">
+                    <div class="card-title" style="font-size: 1.1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.75rem;">
+                        <i class="fa-solid fa-circle-info"></i> Parsed Envelope Info
+                    </div>
+                    <div style="display: grid; grid-template-columns: 80px 1fr; gap: 0.5rem; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted); font-weight: 600;">From:</span>
+                        <span id="parsedSender" style="color: #fff; font-weight: 500;"></span>
+                        
+                        <span style="color: var(--text-muted); font-weight: 600;">Subject:</span>
+                        <span id="parsedSubject" style="color: #fff; font-weight: 500;"></span>
+                    </div>
+                </div>
+
+                <!-- Metrics Dashboard Grid -->
+                <div class="analysis-grid">
+                    
+                    <!-- Exclamations -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Exclamations</span>
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                        </div>
+                        <div class="metric-value" id="valExcl">0</div>
+                        <div class="metric-desc">Count of '!' characters. Spammers abuse punctuation to convey urgency.</div>
+                        <span id="flagExcl" class="metric-flag"></span>
+                    </div>
+
+                    <!-- Caps Ratio -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Subject Caps Ratio</span>
+                            <i class="fa-solid fa-font"></i>
+                        </div>
+                        <div class="metric-value" id="valCaps">0%</div>
+                        <div class="metric-desc">Ratio of uppercase letters in Subject. Capitalization suggests urgency.</div>
+                        <span id="flagCaps" class="metric-flag"></span>
+                    </div>
+
+                    <!-- Link count -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>URL Signals</span>
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                        <div class="metric-value" id="valUrls">0</div>
+                        <div class="metric-desc">Extracted URLs and Shorteners (e.g. bit.ly, tinyurl).</div>
+                        <span id="flagUrls" class="metric-flag"></span>
+                    </div>
+
+                    <!-- Sender Domain Analysis -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Sender Reputation</span>
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div class="metric-value" id="valSender">0.0</div>
+                        <div class="metric-desc">Domain score based on suspicious TLDs, numbers, and usernames.</div>
+                        <span id="flagSender" class="metric-flag"></span>
+                    </div>
+
+                </div>
+
+                <!-- Preprocessed Text Preview -->
+                <div class="card" style="gap: 0.75rem;">
+                    <div class="card-title" style="font-size: 1.1rem;">
+                        <i class="fa-solid fa-terminal"></i>
+                        <span>Preprocessed Text tokens (Classifier Input)</span>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">This is the exact token content fed to scikit-learn after HTML-stripping, lowercasing, punctuation stripping, and stop word removal:</p>
+                    <div id="cleanedPreview" class="preview-box"></div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Aegis Anti-Spam Guard. Built using Python, Flask, and scikit-learn.</p>
+    </footer>
+
+    <script>
+        const templates = {
+            spam1: `From: cash-transfer@instant-loans.click
+Subject: $$$ PRE-APPROVED LOAN OFFER OF $15,000 $$$
+Date: Mon, 15 Jun 2026
+
+Dear customer,
+You qualify for a pre-approved, no-credit-check loan of $15,000! 
+Hurry up and click here http://bit.ly/cashnow123 to claim it immediately!
+Guaranteed approval with 0.1% interest. Act now!
+`,
+            spam2: `From: award-notification@sweepstakes2026.xyz
+Subject: CONGRATULATIONS! You won a brand new Smartphone today!
+Date: Mon, 15 Jun 2026
+
+Dear lucky winner,
+Your email address has been randomly selected as our grand prize winner.
+Go to www.prize-winner.biz/phone to secure your package today!
+Failure to claim within 24 hours will forfeit the award.
+`,
+            ham1: `From: alice.smith@gmail.com
+Subject: Project Status Review Meeting
+Date: Mon, 15 Jun 2026
+
+Hi team,
+Let's meet tomorrow at 10:00 AM to review the current status of the spam detection model project.
+Please make sure your code changes are pushed to git beforehand.
+
+Best,
+Alice
+`,
+            ham2: `From: john.doe@hotmail.com
+Subject: Weekend plans
+Date: Sun, 14 Jun 2026
+
+Hey! Just wanted to check if you are free this coming Saturday to grab some coffee and chat about the upcoming mini-project presentation. Let me know!
+`
+        };
+
+        function loadTemplate() {
+            const select = document.getElementById("templateSelect");
+            const key = select.value;
+            const textarea = document.getElementById("emailInput");
+            if (key && templates[key]) {
+                textarea.value = templates[key];
+            } else {
+                textarea.value = "";
+            }
+        }
+
+        async function analyzeEmail() {
+            const emailText = document.getElementById("emailInput").value.trim();
+            if (!emailText) {
+                alert("Please enter or paste email text first!");
+                return;
+            }
+
+            const scanBtn = document.getElementById("scanBtn");
+            const placeholder = document.getElementById("resultsPlaceholder");
+            const container = document.getElementById("resultsContainer");
+            
+            // Set Loading state
+            scanBtn.disabled = true;
+            scanBtn.innerHTML = `<i class="fa-solid fa-spinner spinner"></i> Scanning...`;
+            
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_text: emailText })
+                });
+
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    // Show container and hide placeholder
+                    placeholder.style.display = "none";
+                    container.style.display = "flex";
+                    
+                    // 1. Verdict update
+                    const vHeader = document.getElementById("verdictHeader");
+                    const vIcon = document.getElementById("verdictIcon");
+                    const vText = document.getElementById("verdictText");
+                    const gaugeBar = document.getElementById("gaugeBar");
+                    const gaugePct = document.getElementById("gaugePct");
+                    const gaugeLabelName = document.getElementById("gaugeLabelName");
+                    
+                    vHeader.className = "verdict-header " + data.prediction;
+                    
+                    if (data.prediction === "spam") {
+                        vIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #f87171; text-shadow: 0 0 10px rgba(239,68,68,0.5);"></i>`;
+                        vText.innerText = "Spam Detected";
+                        vText.className = "verdict-badge spam-text";
+                        
+                        gaugeBar.style.width = data.confidence + "%";
+                        gaugeBar.style.background = "var(--spam-gradient)";
+                        gaugePct.innerText = data.confidence + "%";
+                        gaugePct.style.color = "#f87171";
+                        gaugeLabelName.innerText = "Spam Probability";
+                    } else {
+                        vIcon.innerHTML = `<i class="fa-solid fa-circle-check" style="color: #34d399; text-shadow: 0 0 10px rgba(16,185,129,0.5);"></i>`;
+                        vText.innerText = "Genuine (Ham)";
+                        vText.className = "verdict-badge ham-text";
+                        
+                        gaugeBar.style.width = data.confidence + "%";
+                        gaugeBar.style.background = "var(--ham-gradient)";
+                        gaugePct.innerText = data.confidence + "%";
+                        gaugePct.style.color = "#34d399";
+                        gaugeLabelName.innerText = "Ham Probability";
+                    }
+                    
+                    // 2. Parse info update
+                    document.getElementById("parsedSender").innerText = data.parsed.sender;
+                    document.getElementById("parsedSubject").innerText = data.parsed.subject;
+                    
+                    // 3. Exclamations
+                    const valExcl = document.getElementById("valExcl");
+                    const flagExcl = document.getElementById("flagExcl");
+                    valExcl.innerText = data.features.exclamation_count;
+                    if (data.features.exclamation_count > 2) {
+                        flagExcl.innerText = "Suspicious Punctuation";
+                        flagExcl.className = "metric-flag warning";
+                    } else {
+                        flagExcl.innerText = "Normal";
+                        flagExcl.className = "metric-flag safe";
+                    }
+                    
+                    // 4. Caps Ratio
+                    const valCaps = document.getElementById("valCaps");
+                    const flagCaps = document.getElementById("flagCaps");
+                    valCaps.innerText = data.features.caps_ratio + "%";
+                    if (data.features.caps_ratio > 30) {
+                        flagCaps.innerText = "HIGH CAPS RATIO";
+                        flagCaps.className = "metric-flag warning";
+                    } else {
+                        flagCaps.innerText = "Normal";
+                        flagCaps.className = "metric-flag safe";
+                    }
+                    
+                    // 5. URLs
+                    const valUrls = document.getElementById("valUrls");
+                    const flagUrls = document.getElementById("flagUrls");
+                    valUrls.innerText = `${data.features.url_count} Link(s)`;
+                    if (data.features.has_shortener) {
+                        flagUrls.innerText = "Shortener Link Detected";
+                        flagUrls.className = "metric-flag warning";
+                    } else if (data.features.url_count > 2) {
+                        flagUrls.innerText = "Multiple Links";
+                        flagUrls.className = "metric-flag warning";
+                    } else {
+                        flagUrls.innerText = "Safe URL count";
+                        flagUrls.className = "metric-flag safe";
+                    }
+                    
+                    // 6. Sender Domain reputation
+                    const valSender = document.getElementById("valSender");
+                    const flagSender = document.getElementById("flagSender");
+                    valSender.innerText = data.features.suspicion_score.toFixed(1);
+                    
+                    let senderDesc = [];
+                    if (data.features.is_free_domain) senderDesc.push("Free Domain");
+                    if (data.features.numeric_username_ratio > 30) senderDesc.push("Numeric User");
+                    if (data.features.suspicion_score > 0.5) senderDesc.push("Untrusted TLD/Format");
+                    
+                    if (data.features.suspicion_score > 0.5 || data.features.numeric_username_ratio > 30) {
+                        flagSender.innerText = senderDesc.join(" | ") || "Suspicious Sender";
+                        flagSender.className = "metric-flag warning";
+                    } else {
+                        flagSender.innerText = "Trusted/Free Domain";
+                        flagSender.className = "metric-flag safe";
+                    }
+                    
+                    // 7. Cleaned Text Preview
+                    document.getElementById("cleanedPreview").innerText = data.cleaned_text || "(No tokenized text remaining after preprocessing)";
+                    
+                } else {
+                    alert("Analysis failed: " + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Network error contacting the prediction server.");
+            } finally {
+                // Restore button state
+                scanBtn.disabled = false;
+                scanBtn.innerHTML = `<i class="fa-solid fa-crosshairs"></i> <span>Scan Message</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
